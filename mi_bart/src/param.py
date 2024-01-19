@@ -54,18 +54,20 @@ def get_optimizer(optim, verbose=False):
 def parse_args(parse=True, **optional_kwargs):
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("-f", "--f", "--fff", help="a dummy argument to fool ipython", default="1")
+
     parser.add_argument('--seed', type=int, default=9595, help='random seed')
 
     # Data Splits
     parser.add_argument("--train", default='train')
     parser.add_argument("--valid", default='valid')
     parser.add_argument("--test", default=None)
-    parser.add_argument('--test_only', action='store_true')
-    parser.add_argument("--use_qcat", action='store_true')
-    parser.add_argument('--img_only', action='store_true')
-    parser.add_argument('--use_img_captions', action='store_true')
+    parser.add_argument('--test_only', action='store_true', default=False)
+    parser.add_argument("--use_qcat", action='store_true', default=False)
+    parser.add_argument('--img_only', action='store_true', default=False)
+    parser.add_argument('--use_img_captions', action='store_true', default=False)
 
-    parser.add_argument('--submit', action='store_true')
+    parser.add_argument('--submit', action='store_true', default=False)
 
     # Quick experiments
     parser.add_argument('--train_topk', type=int, default=-1)
@@ -74,12 +76,12 @@ def parse_args(parse=True, **optional_kwargs):
     # Checkpoint
     parser.add_argument('--output', type=str, default='snap/test')
     parser.add_argument('--load', type=str, default=None, help='Load the model (usually the fine-tuned model).')
-    parser.add_argument('--from_scratch', action='store_true')
+    parser.add_argument('--from_scratch', action='store_true', default=False)
 
     # CPU/GPU
     parser.add_argument("--multiGPU", action='store_const', default=False, const=True)
-    parser.add_argument('--fp16', action='store_true')
-    parser.add_argument("--distributed", action='store_true')
+    parser.add_argument('--fp16', action='store_true', default=False)
+    parser.add_argument("--distributed", action='store_true', default=False)
     parser.add_argument("--num_workers", default=0, type=int)
     parser.add_argument('--local_rank', type=int, default=-1)
 
@@ -94,7 +96,7 @@ def parse_args(parse=True, **optional_kwargs):
     parser.add_argument('--use_vis_order_embedding', default=True, type=str2bool)
     parser.add_argument('--use_vis_layer_norm', default=True, type=str2bool)
     parser.add_argument('--individual_vis_layer_norm', default=True, type=str2bool)
-    parser.add_argument('--share_vis_lang_layer_norm', action='store_true')
+    parser.add_argument('--share_vis_lang_layer_norm', action='store_true', default=False)
 
     parser.add_argument('--n_boxes', type=int, default=36)
     parser.add_argument('--max_n_boxes', type=int, default=36)
@@ -117,7 +119,7 @@ def parse_args(parse=True, **optional_kwargs):
 
     parser.add_argument("--losses", default='lm,obj,attr,feat', type=str)
 
-    parser.add_argument('--log_train_accuracy', action='store_true')
+    parser.add_argument('--log_train_accuracy', action='store_true', default=False)
 
     parser.add_argument('--n_ground', type=int, default=1)
     parser.add_argument("--wordMaskRate", dest='word_mask_rate', default=0.15, type=float)
@@ -128,12 +130,12 @@ def parse_args(parse=True, **optional_kwargs):
     parser.add_argument('--gen_max_length', type=int, default=50)
 
     # Data
-    parser.add_argument('--caption_only', action='store_true')
-    parser.add_argument('--coco_only', action='store_true')
+    parser.add_argument('--caption_only', action='store_true', default=False)
+    parser.add_argument('--coco_only', action='store_true', default=False)
     parser.add_argument('--caption_cocoonly', default=True, type=str2bool)
 
-    parser.add_argument('--do_lower_case', action='store_true')
-    parser.add_argument('--oscar_tags', action='store_true')
+    parser.add_argument('--do_lower_case', action='store_true', default=False)
+    parser.add_argument('--oscar_tags', action='store_true', default=False)
 
     parser.add_argument('--prefix', type=str, default=None)
 
@@ -141,21 +143,21 @@ def parse_args(parse=True, **optional_kwargs):
     parser.add_argument('--ground_upsample', type=int, default=1)
     parser.add_argument('--ground_weight', type=int, default=1)
     parser.add_argument('--itm_cocoonly', default=True, type=str2bool)
-    parser.add_argument('--single_vqa_prefix', action='store_true')
+    parser.add_argument('--single_vqa_prefix', action='store_true', default=False)
 
     # COCO Caption
-    parser.add_argument('--no_prefix', action='store_true')
+    parser.add_argument('--no_prefix', action='store_true', default=False)
 
     # VQA
-    parser.add_argument("--raw_label", action='store_true')
-    parser.add_argument("--answer_normalize", action='store_true')
-    parser.add_argument("--classifier", action='store_true')
-    parser.add_argument("--test_answerable", action='store_true')
+    parser.add_argument("--raw_label", action='store_true', default=False)
+    parser.add_argument("--answer_normalize", action='store_true', default=False)
+    parser.add_argument("--classifier", action='store_true', default=False)
+    parser.add_argument("--test_answerable", action='store_true', default=False)
 
     # RefCOCOg
-    parser.add_argument('--RefCOCO_GT', action='store_true')
-    parser.add_argument('--RefCOCO_BUTD', action='store_true')
-    parser.add_argument("--shuffle_boxes", action='store_true')
+    parser.add_argument('--RefCOCO_GT', action='store_true', default=False)
+    parser.add_argument('--RefCOCO_BUTD', action='store_true', default=False)
+    parser.add_argument("--shuffle_boxes", action='store_true', default=False)
 
     # Multitask
     parser.add_argument("--multitask_sampling", type=str, default='roundrobin')
@@ -163,7 +165,7 @@ def parse_args(parse=True, **optional_kwargs):
 
     # Etc.
     parser.add_argument('--comment', type=str, default='')
-    parser.add_argument("--dry", action='store_true')
+    parser.add_argument("--dry", action='store_true', default=False)
 
     # Parse the arguments.
     if parse:

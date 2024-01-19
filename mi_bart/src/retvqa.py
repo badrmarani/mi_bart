@@ -16,14 +16,13 @@ import logging
 import shutil
 from pprint import pprint
 
-from param import parse_args
+from .param import parse_args
 
 
 # from nlvr_data import get_loader
-from retvqa_data import get_loader
-from utils import load_state_dict, LossMeter, set_global_logging_level
-import dist_utils
-import wandb
+from .retvqa_data import get_loader
+from .utils import load_state_dict, LossMeter, set_global_logging_level
+from .dist_utils import all_gather 
 from pprint import pformat
 
 set_global_logging_level(logging.ERROR, ["transformers"])
@@ -36,7 +35,7 @@ _use_apex = False
 
 # Check if Pytorch version >= 1.6 to switch between Native AMP and Apex
 if version.parse(torch.__version__) < version.parse("1.6"):
-    from transormers.file_utils import is_apex_available
+    from transformers.file_utils import is_apex_available
     if is_apex_available():
         from apex import amp
     _use_apex = True
@@ -45,7 +44,7 @@ else:
     from torch.cuda.amp import autocast
 
 
-from trainer_base import TrainerBase
+from .trainer_base import TrainerBase
 
 class Trainer(TrainerBase):
     def __init__(self, args, train_loader=None, val_loader=None, test_loader=None, train=True):
@@ -60,8 +59,7 @@ class Trainer(TrainerBase):
         if not self.verbose:
             set_global_logging_level(logging.ERROR, ["transformers"])
 
-        from nlvr_model import VLT5NLVR
-        from webqa_qa_model import VLBartWebQA_QA
+        from .retvqa_model import VLT5NLVR, VLBartWebQA_QA
 
         model_kwargs = {}
         if 't5' in args.backbone:
@@ -105,7 +103,7 @@ class Trainer(TrainerBase):
         # Load Checkpoint
         self.start_epoch = None
         if args.load is not None:
-            ckpt_path = args.load + '.pth'
+            ckpt_path = args.load
             self.load_checkpoint(ckpt_path)
 
 
@@ -395,7 +393,7 @@ class Trainer(TrainerBase):
             if self.args.distributed:
                 dist.barrier()
 
-                dist_results = dist_utils.all_gather(results)
+                dist_results = all_gather(results)
                 predictions = []
                 targets = []
                 for result in dist_results:

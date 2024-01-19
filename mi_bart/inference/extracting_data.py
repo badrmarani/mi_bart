@@ -10,9 +10,9 @@ import datasets
 import numpy as np
 import torch
 
-from modeling_frcnn import GeneralizedRCNN
-from processing_image import Preprocess
-from utils import Config
+from .modeling_frcnn import GeneralizedRCNN
+from .processing_image import Preprocess
+from .utils import Config
 
 
 """
@@ -98,7 +98,7 @@ class Extract:
     def __call__(self):
         # make writer
         if not TEST:
-            writer = datasets.ArrowWriter(features=self.schema, path=self.outputfile)
+            writer = datasets.arrow_writer.ArrowWriter(features=self.schema, path=self.outputfile)
         # do file generator
         for i, (img_ids, filepaths) in enumerate(self.file_generator):
             images, sizes, scales_yx = self.preprocess(filepaths)

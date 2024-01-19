@@ -15,8 +15,7 @@ import logging
 import shutil
 from pprint import pprint
 
-from utils import load_state_dict, LossMeter, set_global_logging_level
-import wandb
+from .utils import load_state_dict, LossMeter, set_global_logging_level
 from pprint import pformat
 
 proj_dir = Path(__file__).resolve().parent.parent
@@ -111,7 +110,7 @@ class TrainerBase(object):
 
     def create_tokenizer(self, **kwargs):
         from transformers import T5Tokenizer, BartTokenizer, T5TokenizerFast, BartTokenizerFast
-        from tokenization import VLT5Tokenizer, VLT5TokenizerFast
+        from .tokenization import VLT5Tokenizer, VLT5TokenizerFast
 
         if 't5' in self.args.tokenizer:
             if self.args.use_vision:

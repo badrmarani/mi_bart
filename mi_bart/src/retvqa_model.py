@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 
 
-from modeling_t5 import VLT5
+from .modeling_t5 import VLT5
 class VLT5NLVR(VLT5):
     def __init__(self, config):
         super().__init__(config)
@@ -100,7 +100,7 @@ class VLT5NLVR(VLT5):
         return result
 
 
-from modeling_bart import VLBart
+from .modeling_bart import VLBart
 class VLBartWebQA_QA(VLBart):
     def __init__(self, config):
         super().__init__(config)
@@ -162,16 +162,17 @@ class VLBartWebQA_QA(VLBart):
         device = next(self.parameters()).device
         input_ids = batch['input_ids'].to(device)
         B = len(input_ids)
+        num_images = batch['boxes'].size(1)
         V_L = batch['vis_feats'].size(2)
-        vis_feats = batch['vis_feats'].to(device).view(B, 2*V_L, 2048)
-        vis_pos = batch['boxes'].to(device).view(B, 2*V_L, 4)
+        vis_feats = batch['vis_feats'].to(device).view(B, -1, 2048)
+        vis_pos = batch['boxes'].to(device).view(B, -1, 4)
 
-        img_order_ids = [0] * V_L + [1] * V_L
+        img_order_ids = [[i] * V_L for i in range(num_images)]
         img_order_ids = torch.tensor(img_order_ids, dtype=torch.long, device=device)
-        img_order_ids = img_order_ids.view(1, 2*V_L).expand(B, -1)
+        img_order_ids = img_order_ids.view(1, -1).expand(B, -1)
 
         obj_order_ids = torch.arange(V_L, dtype=torch.long, device=device)
-        obj_order_ids = obj_order_ids.view(1, 1, V_L).expand(B, 2, -1).contiguous().view(B, 2*V_L)
+        obj_order_ids = obj_order_ids.view(1, 1, V_L).expand(B, num_images, -1).contiguous().view(B, -1)
 
         decoder_input_ids = torch.tensor(
             [self.config.decoder_start_token_id, self.config.bos_token_id],

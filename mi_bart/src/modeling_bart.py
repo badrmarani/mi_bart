@@ -264,7 +264,7 @@ class JointEncoder(BartEncoder):
                         attention_mask,
                     )
                 else:
-                    layer_outputs = encoder_layer(hidden_states, attention_mask, output_attentions=output_attentions)
+                    layer_outputs = encoder_layer(hidden_states, attention_mask, layer_head_mask=None, output_attentions=output_attentions)
 
                 hidden_states = layer_outputs[0]
 
